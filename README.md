@@ -44,8 +44,16 @@ Everything you put inside "src/init/" will go to "/docker-entrypoint-initdb.d/" 
 
 
 ---
+## Production
+### Build
+```
+docker build -t database-tester -f ./Dockerfile.prod .
+```
 
-
+### Deploy
+```
+docker run --name database-tester -e MARIADB_ROOT_PASSWORD=PASSWORDOFYOURCHOICE database-tester
+```
 
 ## TROUBLESHOOTING
 
