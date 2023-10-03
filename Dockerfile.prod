@@ -1,0 +1,7 @@
+FROM mariadb
+
+EXPOSE 3306
+
+ENV MARIADB_DATABASE=Learning
+
+COPY ./src/init/* /docker-entrypoint-initdb.d/
