@@ -1,4 +1,4 @@
-# The Legend Of Pinha The Database Master
+# Quick Testing database (with data included)
 
 ## Deployment
 
