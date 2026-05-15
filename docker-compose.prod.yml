@@ -24,22 +24,6 @@ services:
     networks:
       - internal
 
-  adminer:
-    image: adminer
-    restart: always
-    networks:
-      - internal
-      - proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.test-db-adminer.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/adminer`)"
-      - "traefik.http.routers.test-db-adminer.entrypoints=websecure"
-      - "traefik.http.routers.test-db-adminer.tls=true"
-      - "traefik.http.routers.test-db-adminer.tls.certresolver=le"
-      - "traefik.http.routers.test-db-adminer.middlewares=test-db-adminer-strip"
-      - "traefik.http.middlewares.test-db-adminer-strip.stripprefix.prefixes=/adminer"
-      - "traefik.http.services.test-db-adminer.loadbalancer.server.port=8080"
-
   reset-api:
     build: ./src/reset-api
     restart: always
