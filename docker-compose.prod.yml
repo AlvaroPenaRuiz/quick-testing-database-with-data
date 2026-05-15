@@ -32,7 +32,6 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
       - "traefik.http.routers.test-db-adminer.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/adminer`)"
       - "traefik.http.routers.test-db-adminer.entrypoints=websecure"
       - "traefik.http.routers.test-db-adminer.tls=true"
@@ -60,7 +59,6 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
       - "traefik.http.routers.test-db-api.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/api`)"
       - "traefik.http.routers.test-db-api.entrypoints=websecure"
       - "traefik.http.routers.test-db-api.tls=true"
