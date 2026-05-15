@@ -1,0 +1,76 @@
+version: '3.1'
+
+# Production mode behind Traefik.
+# Requires a .env file with DB_PASSWORD and RESET_TOKEN.
+# Run with: docker compose -f docker-compose.prod.yml up -d
+
+services:
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      MARIADB_DATABASE: Learning
+    ports:
+      # Direct DB access for DBeaver/IDEs.
+      # Prefer SSH tunnel on servers exposed to the public internet.
+      - "3306:3306"
+    volumes:
+      - type: bind
+        source: ./src/init
+        target: /docker-entrypoint-initdb.d
+    networks:
+      - internal
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - internal
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.test-db-adminer.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/adminer`)"
+      - "traefik.http.routers.test-db-adminer.entrypoints=websecure"
+      - "traefik.http.routers.test-db-adminer.tls=true"
+      - "traefik.http.routers.test-db-adminer.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.test-db-adminer.middlewares=test-db-adminer-strip"
+      - "traefik.http.middlewares.test-db-adminer-strip.stripprefix.prefixes=/adminer"
+      - "traefik.http.services.test-db-adminer.loadbalancer.server.port=8080"
+
+  reset-api:
+    build: ./src/reset-api
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_NAME: Learning
+      RESET_TOKEN: ${RESET_TOKEN:?RESET_TOKEN is required}
+    volumes:
+      - type: bind
+        source: ./src/init
+        target: /init
+    networks:
+      - internal
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.test-db-api.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.test-db-api.entrypoints=websecure"
+      - "traefik.http.routers.test-db-api.tls=true"
+      - "traefik.http.routers.test-db-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.test-db-api.middlewares=test-db-api-strip"
+      - "traefik.http.middlewares.test-db-api-strip.stripprefix.prefixes=/api"
+      - "traefik.http.services.test-db-api.loadbalancer.server.port=8081"
+    depends_on:
+      - db
+
+networks:
+  traefik:
+    external: true
+  internal:
