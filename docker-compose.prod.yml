@@ -11,11 +11,12 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      MARIADB_ROOT_HOST: "%"
       MARIADB_DATABASE: Learning
     ports:
       # Direct DB access for DBeaver/IDEs.
       # Prefer SSH tunnel on servers exposed to the public internet.
-      - "3306:3306"
+      - "33306:3306"
     volumes:
       - type: bind
         source: ./src/init
@@ -28,10 +29,10 @@ services:
     restart: always
     networks:
       - internal
-      - traefik
+      - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.test-db-adminer.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/adminer`)"
       - "traefik.http.routers.test-db-adminer.entrypoints=websecure"
       - "traefik.http.routers.test-db-adminer.tls=true"
@@ -56,10 +57,10 @@ services:
         target: /init
     networks:
       - internal
-      - traefik
+      - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.test-db-api.rule=Host(`test-db.alvaropenaruiz.com`) && PathPrefix(`/api`)"
       - "traefik.http.routers.test-db-api.entrypoints=websecure"
       - "traefik.http.routers.test-db-api.tls=true"
@@ -71,6 +72,6 @@ services:
       - db
 
 networks:
-  traefik:
+  proxy:
     external: true
   internal:
